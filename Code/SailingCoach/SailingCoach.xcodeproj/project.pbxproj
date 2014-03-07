@@ -11,6 +11,7 @@
 		C9E2B08818CA468100A1685B /* SailingCoach.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = C9E2B08718CA468100A1685B /* SailingCoach.1 */; };
 		C9E2B08F18CA483000A1685B /* libopencv_core.2.4.8.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C9E2B08E18CA483000A1685B /* libopencv_core.2.4.8.dylib */; };
 		C9E2B09118CA490C00A1685B /* libopencv_highgui.2.4.8.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C9E2B09018CA490C00A1685B /* libopencv_highgui.2.4.8.dylib */; };
+		C9E2B09418CA575800A1685B /* libopencv_imgproc.2.4.8.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C9E2B09318CA575800A1685B /* libopencv_imgproc.2.4.8.dylib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -32,6 +33,7 @@
 		C9E2B08718CA468100A1685B /* SailingCoach.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = SailingCoach.1; sourceTree = "<group>"; };
 		C9E2B08E18CA483000A1685B /* libopencv_core.2.4.8.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_core.2.4.8.dylib; path = /opt/local/lib/libopencv_core.2.4.8.dylib; sourceTree = "<absolute>"; };
 		C9E2B09018CA490C00A1685B /* libopencv_highgui.2.4.8.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_highgui.2.4.8.dylib; path = /opt/local/lib/libopencv_highgui.2.4.8.dylib; sourceTree = "<absolute>"; };
+		C9E2B09318CA575800A1685B /* libopencv_imgproc.2.4.8.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_imgproc.2.4.8.dylib; path = /opt/local/lib/libopencv_imgproc.2.4.8.dylib; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -39,6 +41,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C9E2B09418CA575800A1685B /* libopencv_imgproc.2.4.8.dylib in Frameworks */,
 				C9E2B09118CA490C00A1685B /* libopencv_highgui.2.4.8.dylib in Frameworks */,
 				C9E2B08F18CA483000A1685B /* libopencv_core.2.4.8.dylib in Frameworks */,
 			);
@@ -76,6 +79,7 @@
 		C9E2B09218CA492C00A1685B /* OpenCV Frameworok */ = {
 			isa = PBXGroup;
 			children = (
+				C9E2B09318CA575800A1685B /* libopencv_imgproc.2.4.8.dylib */,
 				C9E2B09018CA490C00A1685B /* libopencv_highgui.2.4.8.dylib */,
 				C9E2B08E18CA483000A1685B /* libopencv_core.2.4.8.dylib */,
 			);
