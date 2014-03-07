@@ -12,6 +12,8 @@
 using namespace cv;
 using namespace std;
 
+#define ESC_KEY 27
+
 //This is a struct type that will hold min/max in HSV space
 typedef struct
 {
@@ -23,6 +25,7 @@ typedef struct
     int v_max = 255;
 } Threshold_t;
 
+/******************* GLOBAL VARS **********************/
 
 //Window names
 const string videoFeed = "Video Feed";
@@ -34,7 +37,9 @@ bool trackObjects = true;
 bool useMorphOps = true;
 bool tuning = false;
 
+/************* FUNCTION PROTOTYPES ******************/
 void createTrackbars(Threshold_t&, const string);
+void morphOps(Mat &);
 
 int main(int argc, const char * argv[])
 {
@@ -70,8 +75,9 @@ int main(int argc, const char * argv[])
     Mat thisFrame_rgb;
     Mat thisFrame_hsv;
     Mat thisFrame_seg;
+    bool breakLoop = false;
     
-    while (1)
+    while (!breakLoop)
     {
         bool bSuccess = cap.read(thisFrame_rgb); //read new frame
         
@@ -89,16 +95,49 @@ int main(int argc, const char * argv[])
                 Scalar(color1_limits.h_max,color1_limits.s_max,color1_limits.v_max),
                 thisFrame_seg);
         
+        //Perform morphological operations on thresholded image to eliminate noise
+        if (useMorphOps)
+        {
+            morphOps(thisFrame_seg);
+        }
+        
         imshow(videoFeed, thisFrame_rgb);
         imshow(segFeed, thisFrame_seg);
         
-        if (waitKey(30) == 27) //wait 30ms for ESC key
-        {
-            printf("User exit command received.\n");
-            break;
-        }
+        char user_input = (char) waitKey(30);
         
-    }
+        switch (user_input)
+		{
+            case '\377':
+                //This means nothing was pressed.
+                break;
+                
+            case 'm':
+                useMorphOps = !useMorphOps;
+                printf("Morphological operations %s.\n", useMorphOps ? "ON" : "OFF");
+                break;
+            case 't':
+                trackObjects = !trackObjects;
+                printf("Tracking objects %s.\n", trackObjects ? "ON" : "OFF");
+
+                break;
+            case 'w':
+                tuning = !tuning;
+                printf("Tuning %s.\n", tuning ? "ON" : "OFF");
+                break;
+                
+            case ESC_KEY:
+            case 'q':
+                cout << "Quitting!" << endl;
+                breakLoop = true;
+				break;
+                
+            default:
+                printf("No behavior defined for '%c'.\n",user_input);
+		} //end switch
+    } //end while loop
+    
+    
     destroyWindow(videoFeed);
     cap.release();
     
@@ -131,6 +170,31 @@ void createTrackbars(Threshold_t& settings, const string name){
     createTrackbar( "V_MAX", name + "_V", &(settings.v_max), 256 );//f
     createTrackbar( "S_MAX", name + "_S", &(settings.s_max), 256 );//d
     createTrackbar( "H_MAX", name + "_H", &(settings.h_max), 256 );//b
+    
+    
+}
+
+/*
+ * This function applies morphological operations to the thresholded image.
+ * It runs two erodes to reduce noise, and two dilates to enlarge remaining
+ * white space.
+ */
+void morphOps(Mat &thresh){
+    
+	//create structuring element that will be used to "dilate" and "erode" image.
+	//the element chosen here is a 3px by 3px rectangle
+    
+	Mat erodeElement = getStructuringElement( MORPH_RECT,Size(3,3));
+    //dilate with larger element so make sure object is nicely visible
+	Mat dilateElement = getStructuringElement( MORPH_RECT,Size(8,8));
+    
+	erode(thresh,thresh,erodeElement);
+	erode(thresh,thresh,erodeElement);
+    
+    
+	dilate(thresh,thresh,dilateElement);
+	dilate(thresh,thresh,dilateElement);
+    
     
     
 }
