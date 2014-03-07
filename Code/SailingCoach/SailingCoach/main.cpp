@@ -37,14 +37,6 @@ int main(int argc, const char * argv[])
     
     printf("Frame size is %dx%d.\n", (int) dWidth,(int) dHeight);
     
-    IplImage *img = cvCreateImage( cvSize(100,200), IPL_DEPTH_8U, 3);
-    
-    if (!img)
-    {
-        printf("Error: Couldn't open the image file.\n");
-        return 1;
-    }
-    
     // Display the image.
     cvNamedWindow("VideoFeed", CV_WINDOW_AUTOSIZE);
     
