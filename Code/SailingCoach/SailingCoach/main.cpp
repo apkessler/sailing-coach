@@ -8,22 +8,14 @@
 
 #include <iostream>
 #include "opencv2/opencv.hpp"
+#include "SettingsLibrary.h"
 
 using namespace cv;
 using namespace std;
 
 #define ESC_KEY 27
 
-//This is a struct type that will hold min/max in HSV space
-typedef struct
-{
-    int h_min = 0;
-    int h_max = 255;
-    int s_min = 0;
-    int s_max = 255;
-    int v_min = 0;
-    int v_max = 255;
-} Threshold_t;
+
 
 /******************* GLOBAL VARS **********************/
 
@@ -125,6 +117,12 @@ int main(int argc, const char * argv[])
                 tuning = !tuning;
                 printf("Tuning %s.\n", tuning ? "ON" : "OFF");
                 break;
+            case 's':
+                saveSettingsToFile(color1_limits, "color1");
+                break;
+            case 'r':
+                readSettingsFromFile(color1_limits, "color1");
+                break;
                 
             case ESC_KEY:
             case 'q':
@@ -149,30 +147,6 @@ int main(int argc, const char * argv[])
 }
 
 
-
-/*
- * This function creates the window that has the trackbar that control the HSV
- * thresholds.
- * For some reason when you try to add the trackbars to the same window, the order in which they appear
- * is totally random and unchangable. So, we just make 3 windows each with only two sliders.
- */
-void createTrackbars(Threshold_t& settings, const string name){
-	//create window for trackbars
-
-    namedWindow(name + "_H",0);
-    namedWindow(name + "_S",0);
-    namedWindow(name + "_V",0);
-    
-	//create trackbars and insert them into window
-    createTrackbar( "V_MIN", name + "_V", &(settings.v_min), 256 );//e
-    createTrackbar( "S_MIN", name + "_S", &(settings.s_min), 256 );//c
-    createTrackbar( "H_MIN", name + "_H", &(settings.h_min), 256 );//a
-    createTrackbar( "V_MAX", name + "_V", &(settings.v_max), 256 );//f
-    createTrackbar( "S_MAX", name + "_S", &(settings.s_max), 256 );//d
-    createTrackbar( "H_MAX", name + "_H", &(settings.h_max), 256 );//b
-    
-    
-}
 
 /*
  * This function applies morphological operations to the thresholded image.
