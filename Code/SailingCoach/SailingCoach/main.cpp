@@ -9,16 +9,16 @@
 #include <iostream>
 #include "opencv2/opencv.hpp"
 #include "ColorSegmentation.h"
+#include "Calibration.h"
 
 using namespace cv;
 using namespace std;
 
+
+/****************************** MODULE DEFINES*********************************/
 #define ESC_KEY 27
-
-
-
-/******************* GLOBAL VARS **********************/
-
+#define CAM_NUM 0
+/****************************** MODULE VARS ***********************************/
 //Window names
 const string videoFeed = "Video Feed";
 const string segFeed = "Segmented Feed";
@@ -29,17 +29,20 @@ bool trackObjects = true;
 bool useMorphOps = true;
 bool tuning = false;
 
-/************* FUNCTION PROTOTYPES ******************/
+/*************************** MODULE PROTOTYPES ********************************/
+void runColorSegmentation(VideoCapture cap, double dWidth, double dHeight);
 void createTrackbars(Threshold_t&, const string);
 void morphOps(Mat &);
 
+
+/**************************** MODULE BODIES ***********************************/
 int main(int argc, const char * argv[])
 {
 
     printf("Starting CV SailingCoach!\n");
     printf("Attempting to open camera feed...");
  
-    VideoCapture cap(1); //open the first camera on list
+    VideoCapture cap(CAM_NUM); //open the first camera on list
     if (!cap.isOpened())
     {
         printf("Couldn't open the camera!\n");
@@ -55,6 +58,62 @@ int main(int argc, const char * argv[])
     double dHeight= cap.get(CV_CAP_PROP_FRAME_HEIGHT);//get the height of video frames
     printf("Frame size is %dx%d.\n", (int) dWidth,(int) dHeight);
     
+    printf("Calibrate camera? [Y/n] ==>");
+    string usr_in;
+    cin >> usr_in;
+
+    if (usr_in[0] == 'Y')
+    {
+        printf("Running calibration...\n");
+        Size boardSize;
+        boardSize.height = 6;
+        boardSize.width = 9;
+        
+        calibrateCameraFromFeed(cap, 5, boardSize, 1.0f);
+    }
+    else
+    {
+        printf("Running segmentation...\n");
+        runColorSegmentation(cap,dWidth,dHeight);
+    }
+    
+    cap.release();
+    
+   
+    return 0;
+}
+
+
+
+/*
+ * This function applies morphological operations to the thresholded image.
+ * It runs two erodes to reduce noise, and two dilates to enlarge remaining
+ * white space.
+ */
+void morphOps(Mat &thresh){
+    
+	//create structuring element that will be used to "dilate" and "erode" image.
+	//the element chosen here is a 3px by 3px rectangle
+    
+	Mat erodeElement = getStructuringElement( MORPH_RECT,Size(3,3));
+    //dilate with larger element so make sure object is nicely visible
+	Mat dilateElement = getStructuringElement( MORPH_RECT,Size(8,8));
+    
+	erode(thresh,thresh,erodeElement);
+	erode(thresh,thresh,erodeElement);
+    
+    
+	dilate(thresh,thresh,dilateElement);
+	dilate(thresh,thresh,dilateElement);
+    
+    
+    
+}
+
+
+void runColorSegmentation(VideoCapture cap, double dWidth, double dHeight)
+{
+    
     // Display the image.
     namedWindow(videoFeed,CV_WINDOW_AUTOSIZE);
     namedWindow(segFeed,CV_WINDOW_AUTOSIZE);
@@ -63,7 +122,7 @@ int main(int argc, const char * argv[])
     Threshold_t color1_limits;
     createTrackbars(color1_limits, controls);
     
-
+    
     Mat thisFrame_rgb;
     Mat thisFrame_hsv;
     Mat thisFrame_seg;
@@ -111,7 +170,7 @@ int main(int argc, const char * argv[])
             case 't':
                 trackObjects = !trackObjects;
                 printf("Tracking objects %s.\n", trackObjects ? "ON" : "OFF");
-
+                
                 break;
             case 'w':
                 tuning = !tuning;
@@ -137,41 +196,10 @@ int main(int argc, const char * argv[])
     
     
     destroyWindow(videoFeed);
-    cap.release();
-    
+    destroyWindow(segFeed);
     thisFrame_rgb.release();
     thisFrame_hsv.release();
     thisFrame_seg.release();
-    
-    return 0;
+
 }
-
-
-
-/*
- * This function applies morphological operations to the thresholded image.
- * It runs two erodes to reduce noise, and two dilates to enlarge remaining
- * white space.
- */
-void morphOps(Mat &thresh){
-    
-	//create structuring element that will be used to "dilate" and "erode" image.
-	//the element chosen here is a 3px by 3px rectangle
-    
-	Mat erodeElement = getStructuringElement( MORPH_RECT,Size(3,3));
-    //dilate with larger element so make sure object is nicely visible
-	Mat dilateElement = getStructuringElement( MORPH_RECT,Size(8,8));
-    
-	erode(thresh,thresh,erodeElement);
-	erode(thresh,thresh,erodeElement);
-    
-    
-	dilate(thresh,thresh,dilateElement);
-	dilate(thresh,thresh,dilateElement);
-    
-    
-    
-}
-
-
 
