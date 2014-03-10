@@ -7,6 +7,7 @@
 //
 
 #include <iostream>
+#include <math.h>
 #include "opencv2/opencv.hpp"
 #include "ColorSegmentation.h"
 #include "Calibration.h"
@@ -19,9 +20,12 @@ using namespace std;
 #define ESC_KEY 27
 #define CAM_NUM 1
 
+#define PI 3.14159265
+
 //max number of objects to be detected in frame
 #define  MAX_NUM_OBJECTS 50
-#define  GREEN  Scalar(0,0,255)
+#define  GREEN  Scalar(0,255,0)
+#define  BLUE Scalar(255,0,0)
 #define  MISSED_COUNT_MAX 7
 //minimum and maximum object area
 double max_object_area, min_object_area;
@@ -126,6 +130,14 @@ void morphOps(Mat &thresh){
     
 }
 
+void onMouse(int event, int x, int y, int, void*)
+{
+    if (event == CV_EVENT_LBUTTONDOWN)
+    {
+        printf("Mouse @ (%d,%d)\n",x,y);
+    }
+}
+
 
 void runColorSegmentation(VideoCapture cap, double dWidth, double dHeight)
 {
@@ -144,7 +156,7 @@ void runColorSegmentation(VideoCapture cap, double dWidth, double dHeight)
     Mat leftFrame, rightFrame, dispFrame;
     bool breakLoop = false;
     Point2d boomPoint = Point2d(-1,-1);
-    
+    setMouseCallback(videoFeed, onMouse);
     while (!breakLoop)
     {
         bool bSuccess = cap.read(thisFrame_rgb); //read new frame
@@ -183,7 +195,18 @@ void runColorSegmentation(VideoCapture cap, double dWidth, double dHeight)
             drawCenterAxes(thisFrame_rgb, Size(dWidth,dHeight),Scalar(255,255,255));
             drawCenterAxes(thisFrame_seg, Size(dWidth,dHeight),Scalar(0,255,0));
         }
+       
+        if (boomPoint.x >= 0 && boomPoint.y >=0 )
+        {
+            line(thisFrame_rgb, Point(dWidth/2,dHeight/2), boomPoint, BLUE,3);
+            line(thisFrame_seg, Point(dWidth/2,dHeight/2), boomPoint, BLUE,3);
+
+            char buffer[16];
+            sprintf(buffer,"dx = %2.1f",boomPoint.x - dWidth/2);
+            putText(thisFrame_rgb,buffer,Point(dWidth - 200,80),1.5,1.5,BLUE,2);
+        }
         
+            
         //Resize and plot
         resize(thisFrame_rgb, leftFrame, Size(0,0),0.5,0.5);
         resize(thisFrame_seg, rightFrame, Size(0,0),0.5,0.5);
