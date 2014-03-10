@@ -6,8 +6,8 @@
 //  Copyright (c) 2014 Andrew Kessler. All rights reserved.
 //
 
-#ifndef __SailingCoach__SettingsLibrary__
-#define __SailingCoach__SettingsLibrary__
+#ifndef __SailingCoach__ColorSegmentation__
+#define __SailingCoach__ColorSegmentation__
 
 #include <iostream>
 

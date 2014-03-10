@@ -6,7 +6,7 @@
 //  Copyright (c) 2014 Andrew Kessler. All rights reserved.
 //
 
-#include "SettingsLibrary.h"
+#include "ColorSegmentation.h"
 #include "opencv2/opencv.hpp"
 
 using namespace std;

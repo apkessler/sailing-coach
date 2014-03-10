@@ -8,7 +8,7 @@
 
 #include <iostream>
 #include "opencv2/opencv.hpp"
-#include "SettingsLibrary.h"
+#include "ColorSegmentation.h"
 
 using namespace cv;
 using namespace std;

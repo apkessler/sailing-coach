@@ -12,7 +12,7 @@
 		C9E2B08F18CA483000A1685B /* libopencv_core.2.4.8.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C9E2B08E18CA483000A1685B /* libopencv_core.2.4.8.dylib */; };
 		C9E2B09118CA490C00A1685B /* libopencv_highgui.2.4.8.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C9E2B09018CA490C00A1685B /* libopencv_highgui.2.4.8.dylib */; };
 		C9E2B09418CA575800A1685B /* libopencv_imgproc.2.4.8.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C9E2B09318CA575800A1685B /* libopencv_imgproc.2.4.8.dylib */; };
-		C9E2B09718CA882200A1685B /* SettingsLibrary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C9E2B09518CA882200A1685B /* SettingsLibrary.cpp */; };
+		C9E2B09718CA882200A1685B /* ColorSegmentation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C9E2B09518CA882200A1685B /* ColorSegmentation.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -35,8 +35,8 @@
 		C9E2B08E18CA483000A1685B /* libopencv_core.2.4.8.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_core.2.4.8.dylib; path = /opt/local/lib/libopencv_core.2.4.8.dylib; sourceTree = "<absolute>"; };
 		C9E2B09018CA490C00A1685B /* libopencv_highgui.2.4.8.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_highgui.2.4.8.dylib; path = /opt/local/lib/libopencv_highgui.2.4.8.dylib; sourceTree = "<absolute>"; };
 		C9E2B09318CA575800A1685B /* libopencv_imgproc.2.4.8.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_imgproc.2.4.8.dylib; path = /opt/local/lib/libopencv_imgproc.2.4.8.dylib; sourceTree = "<absolute>"; };
-		C9E2B09518CA882200A1685B /* SettingsLibrary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SettingsLibrary.cpp; sourceTree = "<group>"; };
-		C9E2B09618CA882200A1685B /* SettingsLibrary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SettingsLibrary.h; sourceTree = "<group>"; };
+		C9E2B09518CA882200A1685B /* ColorSegmentation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ColorSegmentation.cpp; sourceTree = "<group>"; };
+		C9E2B09618CA882200A1685B /* ColorSegmentation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColorSegmentation.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,8 +75,8 @@
 			children = (
 				C9E2B08518CA468100A1685B /* main.cpp */,
 				C9E2B08718CA468100A1685B /* SailingCoach.1 */,
-				C9E2B09518CA882200A1685B /* SettingsLibrary.cpp */,
-				C9E2B09618CA882200A1685B /* SettingsLibrary.h */,
+				C9E2B09518CA882200A1685B /* ColorSegmentation.cpp */,
+				C9E2B09618CA882200A1685B /* ColorSegmentation.h */,
 			);
 			path = SailingCoach;
 			sourceTree = "<group>";
@@ -142,7 +142,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C9E2B09718CA882200A1685B /* SettingsLibrary.cpp in Sources */,
+				C9E2B09718CA882200A1685B /* ColorSegmentation.cpp in Sources */,
 				C9E2B08618CA468100A1685B /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -261,6 +261,7 @@
 				C9E2B08D18CA468100A1685B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
