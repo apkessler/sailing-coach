@@ -3,6 +3,6 @@
 *.dat
 *.dia
 *.LinkFileList
-
+*.xcuserstate
 /Code/SailingCoach/DerivedData/*
 /Code/SailingCoach/SailingCoach.xcodeproj/*
