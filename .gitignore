@@ -5,4 +5,4 @@
 *.LinkFileList
 
 /Code/SailingCoach/DerivedData/*
-
+/Code/SailingCoach/SailingCoach.xcodeproj/*
