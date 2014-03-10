@@ -1,0 +1,8 @@
+*.d
+*.o
+*.dat
+*.dia
+*.LinkFileList
+
+/Code/SailingCoach/DerivedData/*
+
