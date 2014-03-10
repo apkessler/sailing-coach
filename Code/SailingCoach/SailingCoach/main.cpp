@@ -28,12 +28,13 @@ const string controls = "Controls";
 bool trackObjects = true;
 bool useMorphOps = true;
 bool tuning = false;
+bool drawCenter = false;
 
 /*************************** MODULE PROTOTYPES ********************************/
 void runColorSegmentation(VideoCapture cap, double dWidth, double dHeight);
 void createTrackbars(Threshold_t&, const string);
 void morphOps(Mat &);
-
+void drawCenterAxes(Mat&,Size,Scalar);
 
 /**************************** MODULE BODIES ***********************************/
 int main(int argc, const char * argv[])
@@ -152,11 +153,17 @@ void runColorSegmentation(VideoCapture cap, double dWidth, double dHeight)
             morphOps(thisFrame_seg);
         }
         
+        cvtColor(thisFrame_seg, thisFrame_seg,COLOR_GRAY2BGR); //convert back to RGB
         
+        if (drawCenter)
+        {
+            drawCenterAxes(thisFrame_rgb, Size(dWidth,dHeight),Scalar(255,255,255));
+            drawCenterAxes(thisFrame_seg, Size(dWidth,dHeight),Scalar(0,255,0));
+        }
+        
+        //Resize and plot
         resize(thisFrame_rgb, leftFrame, Size(0,0),0.5,0.5);
-        
-        cvtColor(thisFrame_seg, rightFrame,COLOR_GRAY2BGR);
-        resize(rightFrame, rightFrame, Size(0,0),0.5,0.5);
+        resize(thisFrame_seg, rightFrame, Size(0,0),0.5,0.5);
         hconcat(leftFrame, rightFrame, dispFrame);
         imshow(videoFeed, dispFrame);
    
@@ -188,6 +195,10 @@ void runColorSegmentation(VideoCapture cap, double dWidth, double dHeight)
             case 'r':
                 readSettingsFromFile(color1_limits, "color1");
                 break;
+            case 'c':
+                drawCenter = !drawCenter;
+                printf("Draw center axes %s.\n", drawCenter ? "ON" : "OFF");
+                break;
                 
             case ESC_KEY:
             case 'q':
@@ -208,3 +219,13 @@ void runColorSegmentation(VideoCapture cap, double dWidth, double dHeight)
 
 }
 
+
+void drawCenterAxes(Mat &frame, Size theSize,Scalar theColor)
+{
+    int x_center = theSize.width/2;
+    int y_center = theSize.height/2;
+    line(frame,Point(0,y_center),Point(theSize.width,y_center),theColor,1);
+    line(frame,Point(x_center, 0), Point(x_center, theSize.height),theColor,1);
+    circle(frame,Point(x_center,y_center),20,theColor,1);
+    
+}
