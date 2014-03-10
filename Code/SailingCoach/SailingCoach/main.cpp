@@ -17,7 +17,7 @@ using namespace std;
 
 /****************************** MODULE DEFINES*********************************/
 #define ESC_KEY 27
-#define CAM_NUM 0
+#define CAM_NUM 1
 /****************************** MODULE VARS ***********************************/
 //Window names
 const string videoFeed = "Video Feed";
@@ -116,7 +116,6 @@ void runColorSegmentation(VideoCapture cap, double dWidth, double dHeight)
     
     // Display the image.
     namedWindow(videoFeed,CV_WINDOW_AUTOSIZE);
-    namedWindow(segFeed,CV_WINDOW_AUTOSIZE);
     
     //Create settings struct
     Threshold_t color1_limits;
@@ -126,6 +125,7 @@ void runColorSegmentation(VideoCapture cap, double dWidth, double dHeight)
     Mat thisFrame_rgb;
     Mat thisFrame_hsv;
     Mat thisFrame_seg;
+    Mat leftFrame, rightFrame, dispFrame;
     bool breakLoop = false;
     
     while (!breakLoop)
@@ -152,8 +152,14 @@ void runColorSegmentation(VideoCapture cap, double dWidth, double dHeight)
             morphOps(thisFrame_seg);
         }
         
-        imshow(videoFeed, thisFrame_rgb);
-        imshow(segFeed, thisFrame_seg);
+        
+        resize(thisFrame_rgb, leftFrame, Size(0,0),0.5,0.5);
+        
+        cvtColor(thisFrame_seg, rightFrame,COLOR_GRAY2BGR);
+        resize(rightFrame, rightFrame, Size(0,0),0.5,0.5);
+        hconcat(leftFrame, rightFrame, dispFrame);
+        imshow(videoFeed, dispFrame);
+   
         
         char user_input = (char) waitKey(30);
         
@@ -196,7 +202,6 @@ void runColorSegmentation(VideoCapture cap, double dWidth, double dHeight)
     
     
     destroyWindow(videoFeed);
-    destroyWindow(segFeed);
     thisFrame_rgb.release();
     thisFrame_hsv.release();
     thisFrame_seg.release();
