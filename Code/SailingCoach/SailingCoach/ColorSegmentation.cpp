@@ -11,7 +11,14 @@
 
 using namespace std;
 using namespace cv;
+/****************************** MODULE DEFINES*********************************/
+#define CAM_NUM 1
+#define MISSED_COUNT_MAX 7
+#define MAX_NUM_OBJECTS 50
+#define ESC_KEY 27
 
+#define PI 3.14159265
+/****************************** MODULE VARS ***********************************/
 static string intToString(int);
 //Window names
 const string videoFeed = "Video Feed";
@@ -31,11 +38,13 @@ bool is_tracking = false;
 //minimum and maximum object area
 double max_object_area, min_object_area;
 
-#define  MISSED_COUNT_MAX 7
-#define  MAX_NUM_OBJECTS 50
-#define ESC_KEY 27
+/*************************** MODULE PROTOTYPES ********************************/
 
 
+
+
+
+/**************************** MODULE BODIES ***********************************/
 
 void onMouse(int event, int x, int y, int, void*)
 {
@@ -337,8 +346,12 @@ void runColorSegmentation(VideoCapture cap, double dWidth, double dHeight)
             line(thisFrame_seg, Point(dWidth/2,dHeight/2), boomPoint, BLUE,3);
             
             char buffer[16];
-            sprintf(buffer,"dx = %2.1f",boomPoint.x - dWidth/2);
+            int dx = boomPoint.x - dWidth/2;
+            sprintf(buffer,"dx = %d px",dx);
             putText(thisFrame_rgb,buffer,Point(dWidth - 200,80),1.5,1.5,BLUE,2);
+           
+            sprintf(buffer,"Angle = %2.1f deg",asin(dx/BOOM_LENGTH)*180.0/PI);
+            putText(thisFrame_rgb,buffer,Point(dWidth/3,dHeight-100),2,2,BLUE,2);
         }
         
         

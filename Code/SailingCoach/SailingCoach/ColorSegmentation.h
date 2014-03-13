@@ -38,5 +38,5 @@ void drawCenterAxes(Mat&,Size,Scalar);
 
 #define  GREEN  Scalar(0,255,0)
 #define  BLUE   Scalar(255,0,0)
-
+#define BOOM_LENGTH 494.0
 #endif /* defined(__SailingCoach__SettingsLibrary__) */
