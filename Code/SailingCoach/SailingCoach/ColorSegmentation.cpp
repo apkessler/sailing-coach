@@ -476,10 +476,14 @@ const string currentDateTime() {
 
 void saveFrameToFile(Mat &theFrame)
 {
+    vector<int> compression_params;
+    compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
+    compression_params.push_back(0); //no compression
+    
     string fileStr;
     printf("Saving file...\n");
-    fileStr = "frame_" + currentDateTime() + ".jpg";
-    imwrite(fileStr, theFrame);
+    fileStr = "frame_" + currentDateTime() + ".png";
+    imwrite(fileStr, theFrame,compression_params);
     cout << "Wrote " << fileStr << endl;
 }
 
