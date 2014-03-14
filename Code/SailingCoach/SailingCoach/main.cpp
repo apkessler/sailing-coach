@@ -21,7 +21,7 @@ using namespace std;
 /****************************** MODULE VARS ***********************************/
 
 /*************************** MODULE PROTOTYPES ********************************/
-
+void showRawFeed(VideoCapture cap);
 
 /**************************** MODULE BODIES ***********************************/
 int main(int argc, const char * argv[])
@@ -48,23 +48,32 @@ int main(int argc, const char * argv[])
     
 
     
-    printf("Calibrate camera? [Y/n] ==>");
+    printf("Select mode:\n");
+    printf("\t[0] Find checkerboard\n");
+    printf("\t[1] Raw Webcam Feed\n");
+    printf("\t[2] Track Targets\n");
+    printf(">>");
     string usr_in;
     cin >> usr_in;
-
-    if (usr_in[0] == 'Y')
+    Size boardSize;
+    switch (usr_in[0])
     {
-        printf("Running calibration...\n");
-        Size boardSize;
-        boardSize.height = 6;
-        boardSize.width = 9;
-        
-        calibrateCameraFromFeed(cap, 5, boardSize, 1.0f);
-    }
-    else
-    {
-        printf("Running segmentation...\n");
-        runColorSegmentation(cap,dWidth,dHeight);
+        case '0':
+            printf("Running calibration...\n");
+            boardSize.height = 6;
+            boardSize.width = 9;
+            calibrateCameraFromFeed(cap, 5, boardSize, 1.0f);
+            break;
+            
+        case '1':
+            showRawFeed(cap);
+            break;
+            
+        case '2':
+        default:
+            printf("Running segmentation...\n");
+            runColorSegmentation(cap,dWidth,dHeight);
+            break;
     }
     
     cap.release();
@@ -73,7 +82,52 @@ int main(int argc, const char * argv[])
     return 0;
 }
 
+void showRawFeed(VideoCapture cap)
+{
+    string rawFeed = "Raw Feed";
+    
+        // Display the image.
+        namedWindow(rawFeed,CV_WINDOW_AUTOSIZE);
 
-
-
-
+        
+        Mat thisFrame;
+        bool breakLoop = false;
+    
+        while (!breakLoop)
+        {
+            bool bSuccess = cap.read(thisFrame); //read new frame
+            
+            if (!bSuccess)
+            {
+                printf("Read from video stream failed!\n");
+                break;
+            }
+            
+            //resize(thisFrame_rgb, leftFrame, Size(0,0),0.5,0.5);
+            imshow(rawFeed, thisFrame);
+            
+            char user_input = (char) waitKey(30);
+            switch (user_input)
+            {
+                case '\377':
+                    //This means nothing was pressed.
+                    break;
+                case 'f':
+                    saveFrameToFile(thisFrame);
+                    break;
+                    
+                case ESC_KEY:
+                case 'q':
+                    cout << "Quitting!" << endl;
+                    breakLoop = true;
+                    break;
+                    
+                default:
+                    printf("No behavior defined for '%c'.\n",user_input);
+            } //end switch
+        } //end while loop
+        
+        
+        destroyWindow(rawFeed);
+        thisFrame.release();
+}

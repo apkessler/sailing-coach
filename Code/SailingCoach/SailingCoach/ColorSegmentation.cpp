@@ -12,10 +12,9 @@
 using namespace std;
 using namespace cv;
 /****************************** MODULE DEFINES*********************************/
-#define CAM_NUM 1
 #define MISSED_COUNT_MAX 7
 #define MAX_NUM_OBJECTS 50
-#define ESC_KEY 27
+
 
 #define PI 3.14159265
 /****************************** MODULE VARS ***********************************/
@@ -41,7 +40,7 @@ double max_object_area, min_object_area;
 /*************************** MODULE PROTOTYPES ********************************/
 
 
-void saveFrameToFile(Mat &theFrame);
+
 
 
 

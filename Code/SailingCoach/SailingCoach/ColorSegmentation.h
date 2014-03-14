@@ -35,8 +35,10 @@ void runColorSegmentation(VideoCapture cap, double dWidth, double dHeight);
 void createTrackbars(Threshold_t&, const string);
 void morphOps(Mat &);
 void drawCenterAxes(Mat&,Size,Scalar);
+void saveFrameToFile(Mat &theFrame);
 
 #define  GREEN  Scalar(0,255,0)
 #define  BLUE   Scalar(255,0,0)
 #define BOOM_LENGTH 494.0
+#define ESC_KEY 27
 #endif /* defined(__SailingCoach__SettingsLibrary__) */
