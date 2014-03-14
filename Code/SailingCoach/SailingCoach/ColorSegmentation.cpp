@@ -41,6 +41,7 @@ double max_object_area, min_object_area;
 /*************************** MODULE PROTOTYPES ********************************/
 
 
+void saveFrameToFile(Mat &theFrame);
 
 
 
@@ -295,6 +296,7 @@ void runColorSegmentation(VideoCapture cap, double dWidth, double dHeight)
     min_object_area = 100;
     
     Mat thisFrame_rgb;
+    Mat thisFrame_rgb_orig;
     Mat thisFrame_hsv;
     Mat thisFrame_seg;
     Mat leftFrame, rightFrame, dispFrame;
@@ -303,7 +305,8 @@ void runColorSegmentation(VideoCapture cap, double dWidth, double dHeight)
     setMouseCallback(videoFeed, onMouse);
     while (!breakLoop)
     {
-        bool bSuccess = cap.read(thisFrame_rgb); //read new frame
+        bool bSuccess = cap.read(thisFrame_rgb_orig); //read new frame
+        thisFrame_rgb_orig.copyTo(thisFrame_rgb);
         
         if (!bSuccess)
         {
@@ -398,6 +401,9 @@ void runColorSegmentation(VideoCapture cap, double dWidth, double dHeight)
                 drawCenter = !drawCenter;
                 printf("Draw center axes %s.\n", drawCenter ? "ON" : "OFF");
                 break;
+            case 'f':
+                saveFrameToFile(thisFrame_rgb_orig);
+                break;
                 
             case ESC_KEY:
             case 'q':
@@ -454,4 +460,28 @@ void morphOps(Mat &thresh)
     
     
 }
+
+// Get current date/time, format is YYYY-MM-DD.HH:mm:ss
+const string currentDateTime() {
+    time_t     now = time(0);
+    struct tm  tstruct;
+    char       buf[80];
+    tstruct = *localtime(&now);
+    strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
+    
+    return buf;
+}
+
+
+
+
+void saveFrameToFile(Mat &theFrame)
+{
+    string fileStr;
+    printf("Saving file...\n");
+    fileStr = "frame_" + currentDateTime() + ".jpg";
+    imwrite(fileStr, theFrame);
+    cout << "Wrote " << fileStr << endl;
+}
+
 
