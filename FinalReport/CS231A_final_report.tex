@@ -1,0 +1,151 @@
+\documentclass[letterpaper, 10 pt, conference]{ieeeconf}  % Comment this line out
+
+\IEEEoverridecommandlockouts                              % This command is only
+                                                          % needed if you want to
+                                                          % use the \thanks command
+\overrideIEEEmargins
+
+
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{epstopdf}
+\usepackage{algpseudocode}
+\usepackage[autolinebreaks,useliterate,framed]{mcode}
+\usepackage{tikz}
+\usepackage{subfig}
+\usepackage{cite}
+\newcommand{\op}[1]{\operatorname #1}
+\newcommand{\eq}[1]{$\left(\ref{eq:#1}\right)$}
+\newcommand{\fig}[1]{Fig. \ref{fig:#1}}
+\newcommand{\pre}[2]{{}#1 #2}
+\newcommand{\V}[1]{{\bf #1}}
+
+\newcommand{\vect}[1]{\textbf{#1}}
+\newcommand{\del}{\nabla}
+\newcommand{\real}[1]{\mathbb{R}^{#1}}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\newcommand{\step}[2]{{#1}^{\left({#2}\right)}}
+\newcommand{\pinv}[1]{{#1}^\dagger}
+
+\DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
+
+\title{ \bf Computer Vision Sailing Coach}
+\author{Andrew Kessler}
+\date{\today}                                      
+
+\begin{document}
+\maketitle
+
+
+\begin{abstract}
+
+
+This paper presents a review of the Wang and Mason article \emph{Two-Dimensional Rigid-body Collisions with Friction} followed by a method we implemented in Matlab to simulate these rigid-body collisions.  We outline the structure of the simulator code and explain how to set up and run a simulation.  Several example simulations of different types of impacts are then presented and discussed.  The simulator is able to draw the bodies in motion, accurately detect contact, implement the Wang-Mason impact algorithm to calculate post-impact velocities, and continue to draw the bodies in motion.  The simulator has an additional feature that moves the second body through a predefined velocity profile.  This feature could be useful for small part sorting and positioning applications and may be expanded in the future.  
+\end{abstract}
+
+\section{Introduction}
+Manning the helm of a sailboat of any size is a non-trivial skill; unlike driving a car or riding a bicycle, steering a wind-powered vessel demands an acute awareness of current wind conditions, the hydrodynamic properties of the boat, and an understanding of a complex series of mechanical linkages. 
+
+Perhaps the most basic skill involved is optimizing the heading of the boat and the position of the sail(s) (jointly referred to as the ``point-of-sail") given the current wind direction and magnitude. In fact, this optimization can in theory be estimated quite accurately without access to a detailed model of the rest of the ship. Figure \ref{fig:pos} illustrates some basic points-of-sail; notice how the angle of the sails relative to the boat changes depending on the heading of the boat relative to the wind. 
+
+\begin{figure}[htbp]
+   \centering
+   \includegraphics[width=.42\textwidth]{pos_annotated} % requires the graphicx package
+   \caption{Some basic points-of-sail.}
+   \label{fig:pos}
+\end{figure}
+For a given boat heading relative to the wind, there is an optimal angle at which the sails should be deployed relative to the boat, which could be modeled using some simple physics and trigonometry. Even if the wind direction is known exactly (which is rarely the case), determining this optimal angle in real-time can often prove difficult, even for the seasoned-sailor.
+
+\textbf{I propose developing a computer-vision based system that would use data from an on-board camera to:
+(1) determine the wind direction, (2) determine the current sail angle, and (3) compare the current sail angle to the optimal sail angle for the given heading, and suggest adjustments.}
+
+\subsection{Proposed Solution}
+The first step in tackling the problem is narrowing the scope to only consider a single type of boat/sail-configuration. I plan to develop this system using a \emph{pram}, which is a relative small, flat-bottomed boat  with a flat front. 
+
+The base of the sail is firmly mounted to the \emph{boom}, which is essentially a long pole extending horizontally from the mast. The boom can swing anywhere within a $\pm 90^\circ$ range from the centerline of the boat, and is the main factor in determining the angle of the sail. For the purposes of this analysis, we will assume that the boom uniquely determines the sail angle. The pilot controls boom angle via the \emph{mainsheet}: a line\footnote{Ropes in a maritime context are referred to as ``lines".} running from about $\frac{3}{4}$ of the way down the boom to the center of the cockpit. \textbf{By mounting a known and easily detectable fiducial along the length of the boom, the computer-vision system would segment the image based on color to extract the markers, and then use the markers to determine the angle of the boom.}
+
+Additionally, the system would utilize \textbf{outward facing cameras to look for objects that are able to hint at the current wind direction, and extract an estimate of wind direction from their configuration}. Ideally, these would be wind socks and vanes. For the purposes of this prototype, there would be a camera mounted facing a wind vane on-board the ship; the system would infer the wind direction relative to the boat heading based on the known geometry of the wind vane. 
+
+With this information, the system can calculate optimal boom angle. This would then be compared to the current boom angle, and a recommended adjustment would be suggested to the pilot. In fact, this could even be used to implement a closed-loop cruise-control.
+
+As mentioned above, using the boom angle as an approximation of the sail angle is a simplified model. Other factors, such as sail shape, can have a large impact on boat performance. Previous work ([1]) has been done to infer sail shape and curvature from 2D images - this data could be incorporated into making better point-of-sail decisions. 
+
+The system would be implemented using the OpenCV package, and relatively cheap webcams. Additionally, I will fabricate a scale model of the boat/sail, which could be used for basic testing. Time/resource permitting, I would also like to port the system to a mobile platform (e.g. Raspberry Pi) and take the system out on the water to see how it holds up.
+
+\section{Literature Review}
+\subsection{Previous Work}
+\subsection{Why Is This Method Better}
+\section{Implementation}
+\subsection{Optimal Sail Angle}
+Rather than try to derive optimal sail angles based on an analytical dynamics approach, I opted to design a heuristic model based on personal experience and widely accepted ''rules of thumb''. Using the reference frames for boat heading and sail angle relative to the boat (see Figures \ref{fig:wind_frame} and \ref{fig:boat_frame}, respectively), I fit a fourth-order polynomial to the data shown in the table below.
+\[
+\begin{tabular}{c|c|c}
+POS & $\theta$ & $\phi$ \\\hline 
+Close Hauled & $\pi/4$ & 0 \\\hline 
+Beam Reach & $\pi/2$ & $\pi/4$ \\\hline 
+Broad Reach & $3\pi/4$ & $\pi/3$\\\hline 
+Running & $\pi$ & $\pi/2$\end{tabular}
+\]
+Using a least-squares fit, I found fit a polynomial of 
+\[
+\phi = 0.2702 \theta^3 -1.6977 \theta^2 + 3.833 \theta  -2.0944 
+\]
+which is shown in Figure \ref{fig:optimal}. I have no doubt that a more accurate model could be developed, but since this is not the focus of the project, I will leave the model as is- it can always be tweaked later. 
+\begin{figure}[htbp]
+   \centering
+   \includegraphics[width=.42\textwidth]{optimal_angle} % requires the graphicx package
+   \caption{Heuristic model for optimal sail angle.}
+   \label{fig:optimal}
+\end{figure}
+
+\subsection{Fiducial Detection}
+We begin by taking a frame, and thresholding it in HSV space to isolate a particular color fiducial. Then, we can run morphological operations (elaborate) to create ``blobs" of white space. Then, we can do contour finding on these blobs, find the biggest, and use the center point as our target feature. Calling the two-dimensional coordinates of this point in the image $p = [u,v]^T$, we can now use our previously derived model of the camera and boat geometry to map to the corresponding boom angle. 
+\subsection{3D Reconstruction}
+Knowing where the end of the boom is projected into the 2D image ($p$), we wish to estimate where the this point is in 3D space. Our camera matrix $M \in \real{3 \times 4}$ gives us an unambiguous mapping from the real world to image space, but we are one degree of freedom short from the other direction. However, we can use known geometry of the boat to add an additional constraint. We know the length of the boom and the angle at which it sits relative to the world reference frame, and if we assume that the boom rotates about the mast as a perfect circular joint, we know that the tail of the boom (our target point) \emph{must} be constrained to a circle of radius $R = \ell_B\cos{\alpha}$ at $P_y = \ell_B\sin\alpha$ (see Fig. \ref{fig:alpha}). This means that
+\begin{equation}
+P_x^2 + P_z^2 = \ell_B^2\cos^2{\alpha}.
+\label{eq:planar}
+\end{equation}
+We will refer to \eq{planar} as the \emph{radial constraint}; unfortunately this is not easily implemented directly as a linear equation, but the height constraint is usable. So, we add this knowledge of the $y$ coordinate to $M$:
+\begin{equation}
+\left[\begin{array}{c}p_u \\p_v \\1 \\ \ell_B\cos{\alpha} \end{array}\right]
+= \left[\begin{array}{c}M \\e_2^T\end{array}\right]
+\left[\begin{array}{c}P_x \\P_y \\P_z \\P_w\end{array}\right]
+\end{equation}
+where 
+\[
+e_2 = \left[\begin{array}{c}0 \\1 \\0 \\0\end{array}\right].
+\]
+If we let
+\[
+A = \left[\begin{array}{c}M \\e_2^T\end{array}\right], 
+\]
+we can now solve for the position of the target in the real world, in homogenous coordinates:
+\[
+\left[\begin{array}{c}P_x \\P_y \\P_z \\P_w\end{array}\right]=A^{-1}
+\left[\begin{array}{c}p_u \\p_v \\1\\\ell_B\cos{\alpha}\end{array}\right].
+\]
+Finally, we can extract the position.
+
+Now, we will enforce our planar constraint and ``snap" the point onto the allowable circle. We can calculate the closest point on the allowable circircle to our target point by taking the vector distance in 3D between the target and the circle center, $O_C$: 
+\[
+d = P - O_C = \left[\begin{array}{c}P_x \\P_y \\P_z \end{array}\right] - \left[\begin{array}{c}0 \\ \ell_B\cos{\alpha} \\ 0\end{array}\right].
+\]
+We take find the the unit vector pointing in the direction of $d$, then multiply it by the allowed radius $R$ to get the fixed point $P^\star$:
+\[
+P^\star = \frac{R}{\norm{d}}d.
+\]
+Now, calculating the boom angle is a simple matter of finding the angle of $d$ about the y-axis:
+\[
+\theta \approx \tan^{-1}\left({P^\star_x/P^\star_z}\right).
+\]
+\section{Experimental Results}
+
+\section{Conclusion}
+
+\bibliography{./bibcite}{}
+\bibliographystyle{plain}
+
+
+\end{document} 
