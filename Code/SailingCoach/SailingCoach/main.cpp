@@ -16,7 +16,7 @@ using namespace std;
 
 
 /****************************** MODULE DEFINES*********************************/
-#define CAM_NUM 1
+#define CAM_NUM 0
 
 /****************************** MODULE VARS ***********************************/
 
@@ -71,8 +71,20 @@ int main(int argc, const char * argv[])
             
         case '2':
         default:
-            printf("Running segmentation...\n");
-            runColorSegmentation(cap,dWidth,dHeight);
+            printf("Select source:\n");
+            printf("\t[0] Live feed\n");
+            printf("\t[1] Still image\n");
+            printf(">>");
+            cin >> usr_in;
+            if (usr_in[0] - '0' < 2)
+            {
+                printf("Running segmentation...\n");
+                runColorSegmentation(cap,dWidth,dHeight, (int) usr_in[0] - '0' );
+            }
+            else
+            {
+                printf("Bad choice.\n");
+            }
             break;
     }
     

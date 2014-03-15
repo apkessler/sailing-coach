@@ -14,7 +14,8 @@ using namespace cv;
 /****************************** MODULE DEFINES*********************************/
 #define MISSED_COUNT_MAX 7
 #define MAX_NUM_OBJECTS 50
-
+#define MODE_RUN_FROM_FEED 0
+#define MODE_RUN_FROM_STILL 1
 
 #define PI 3.14159265
 /****************************** MODULE VARS ***********************************/
@@ -179,7 +180,7 @@ void trackFilteredObject(Mat threshold, Mat &cameraFeed, Point2d &dst){
 	bool objectFound = false;
 	if (hierarchy.size() > 0)
 	{
-		int numObjects = hierarchy.size();
+		int numObjects = (int) hierarchy.size();
         
 		//if number of objects greater than MAX_NUM_OBJECTS we have a noisy filter
         if(numObjects<MAX_NUM_OBJECTS)
@@ -281,7 +282,7 @@ void drawObject(int x, int y, Mat &frame, Scalar clr){
     
 }
 
-void runColorSegmentation(VideoCapture cap, double dWidth, double dHeight)
+void runColorSegmentation(VideoCapture cap, double dWidth, double dHeight, int mode)
 {
     
     // Display the image.
@@ -302,17 +303,41 @@ void runColorSegmentation(VideoCapture cap, double dWidth, double dHeight)
     bool breakLoop = false;
     Point2d boomPoint = Point2d(-1,-1);
     setMouseCallback(videoFeed, onMouse);
-    while (!breakLoop)
+    
+    if (mode == MODE_RUN_FROM_STILL)
     {
-        bool bSuccess = cap.read(thisFrame_rgb_orig); //read new frame
+        string stillFile;
+        do
+        {
+            printf("Please enter filename: ");
+            cin >> stillFile;
+            thisFrame_rgb_orig = imread(stillFile);
+        }
+        while (!thisFrame_rgb_orig.data);
+        
         thisFrame_rgb_orig.copyTo(thisFrame_rgb);
         
-        if (!bSuccess)
+    }
+    
+    
+    while (!breakLoop)
+    {
+        if(mode == MODE_RUN_FROM_FEED)
         {
-            printf("Read from video stream failed!\n");
-            break;
-        }
+            bool bSuccess = cap.read(thisFrame_rgb_orig); //read new frame
+            thisFrame_rgb_orig.copyTo(thisFrame_rgb);
         
+            if (!bSuccess)
+            {
+                printf("Read from video stream failed!\n");
+                break;
+            }
+        }
+        else
+        {
+            thisFrame_rgb_orig.copyTo(thisFrame_rgb); //reset the image for drawing on top of
+        }
+            
         cvtColor(thisFrame_rgb, thisFrame_hsv, COLOR_BGR2HSV); //convert to HSV
         
         //Now we look for the particular color...

@@ -31,7 +31,7 @@ void saveSettingsToFile(Threshold_t &, std::string);
 
 void drawObject(int, int, Mat &, Scalar);
 void trackFilteredObject(Mat threshold, Mat &cameraFeed, Point2d&);
-void runColorSegmentation(VideoCapture cap, double dWidth, double dHeight);
+void runColorSegmentation(VideoCapture cap, double dWidth, double dHeight, int mode);
 void createTrackbars(Threshold_t&, const string);
 void morphOps(Mat &);
 void drawCenterAxes(Mat&,Size,Scalar);
