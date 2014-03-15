@@ -8,7 +8,7 @@
 
 #include "ColorSegmentation.h"
 #include "opencv2/opencv.hpp"
-
+#include "BoatModel.h"
 using namespace std;
 using namespace cv;
 /****************************** MODULE DEFINES*********************************/
@@ -369,16 +369,15 @@ void runColorSegmentation(VideoCapture cap, double dWidth, double dHeight, int m
         
         if (boomPoint.x >= 0 && boomPoint.y >=0 )
         {
+            //Calculate the angle and draw something about it.
             line(thisFrame_rgb, Point(dWidth/2,dHeight/2), boomPoint, BLUE,3);
             line(thisFrame_seg, Point(dWidth/2,dHeight/2), boomPoint, BLUE,3);
             
-            char buffer[16];
-            int dx = boomPoint.x - dWidth/2;
-            sprintf(buffer,"dx = %d px",dx);
-            putText(thisFrame_rgb,buffer,Point(dWidth - 200,80),1.5,1.5,BLUE,2);
-           
-            sprintf(buffer,"Angle = %2.1f deg",asin(dx/BOOM_LENGTH)*180.0/PI);
-            putText(thisFrame_rgb,buffer,Point(dWidth/3,dHeight-100),2,2,BLUE,2);
+            //Calculate the angle
+            float theAngle = calculateBoomAngle(boomPoint);
+            //sprintf(buffer,"Angle = %2.1f deg",asin(dx/BOOM_LENGTH)*180.0/PI);
+            //putText(thisFrame_rgb,buffer,Point(dWidth/3,dHeight-100),2,2,BLUE,2);
+
         }
         
         
