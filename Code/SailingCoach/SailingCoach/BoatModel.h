@@ -15,4 +15,5 @@ using namespace cv;
 
 
 float calculateBoomAngle(Point2d boomFoot_im);
+int readCameraMatrixFromFile(string fileName);
 #endif /* defined(__SailingCoach__BoatModel__) */

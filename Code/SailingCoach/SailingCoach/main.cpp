@@ -16,20 +16,22 @@ using namespace std;
 
 
 /****************************** MODULE DEFINES*********************************/
-#define CAM_NUM 1
+#define CAM_NUM 0
 
 /****************************** MODULE VARS ***********************************/
 
 /*************************** MODULE PROTOTYPES ********************************/
 void showRawFeed(VideoCapture cap);
-
 /**************************** MODULE BODIES ***********************************/
 int main(int argc, const char * argv[])
 {
 
     printf("Starting CV SailingCoach!\n");
+    
+    
     printf("Attempting to open camera feed...");
  
+    
     VideoCapture cap(CAM_NUM); //open the first camera on list
     if (!cap.isOpened())
     {

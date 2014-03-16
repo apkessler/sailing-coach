@@ -214,7 +214,7 @@ void trackFilteredObject(Mat threshold, Mat &cameraFeed, Point2d &dst){
 				putText(cameraFeed,"Tracking Object",Point(0,50),2,1,Scalar(0,255,0),2);
                 
 				//draw object location on screen
-				drawObject(x,y, cameraFeed, GREEN);
+				drawObject(x,y, cameraFeed, RED);
 			}
 		}
         else
@@ -309,9 +309,9 @@ void runColorSegmentation(VideoCapture cap, double dWidth, double dHeight, int m
         string stillFile;
         do
         {
-            printf("Please enter filename: ");
+            printf("Please enter frame filename: ");
             cin >> stillFile;
-            thisFrame_rgb_orig = imread(stillFile);
+            thisFrame_rgb_orig = imread(stillFile + ".png");
         }
         while (!thisFrame_rgb_orig.data);
         
@@ -319,6 +319,15 @@ void runColorSegmentation(VideoCapture cap, double dWidth, double dHeight, int m
         
     }
     
+    /*
+    string boatFile;
+    do
+    {
+        printf("Please enter boat model filename: ");
+        cin >> boatFile;
+    }
+    while (!readCameraMatrixFromFile(boatFile));
+    */
     
     while (!breakLoop)
     {
@@ -367,17 +376,17 @@ void runColorSegmentation(VideoCapture cap, double dWidth, double dHeight, int m
             drawCenterAxes(thisFrame_seg, Size(dWidth,dHeight),Scalar(0,255,0));
         }
         
-        if (boomPoint.x >= 0 && boomPoint.y >=0 )
+        if (trackObjects && boomPoint.x >= 0 && boomPoint.y >=0 )
         {
             //Calculate the angle and draw something about it.
-            line(thisFrame_rgb, Point(dWidth/2,dHeight/2), boomPoint, BLUE,3);
-            line(thisFrame_seg, Point(dWidth/2,dHeight/2), boomPoint, BLUE,3);
+            //line(thisFrame_rgb, Point(dWidth/2,dHeight/2), boomPoint, BLUE,3);
+            //line(thisFrame_seg, Point(dWidth/2,dHeight/2), boomPoint, BLUE,3);
             
             //Calculate the angle
-            float theAngle = calculateBoomAngle(boomPoint);
+            //float theAngle = calculateBoomAngle(boomPoint);
             //sprintf(buffer,"Angle = %2.1f deg",asin(dx/BOOM_LENGTH)*180.0/PI);
             //putText(thisFrame_rgb,buffer,Point(dWidth/3,dHeight-100),2,2,BLUE,2);
-
+        
         }
         
         
@@ -426,6 +435,9 @@ void runColorSegmentation(VideoCapture cap, double dWidth, double dHeight, int m
                 break;
             case 'f':
                 saveFrameToFile(thisFrame_rgb_orig);
+                break;
+            case 'p':
+                printf("Boom point at (%.2f,%.2f)\n",boomPoint.x,boomPoint.y);
                 break;
                 
             case ESC_KEY:

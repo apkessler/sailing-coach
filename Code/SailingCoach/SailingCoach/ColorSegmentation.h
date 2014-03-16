@@ -39,6 +39,7 @@ void saveFrameToFile(Mat &theFrame);
 
 #define  GREEN  Scalar(0,255,0)
 #define  BLUE   Scalar(255,0,0)
-#define BOOM_LENGTH 494.0
+#define  RED    Scalar(0,0,255)
+
 #define ESC_KEY 27
 #endif /* defined(__SailingCoach__SettingsLibrary__) */
