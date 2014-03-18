@@ -32,16 +32,11 @@
 
 \DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
 
-\title{ {\bf Computer Vision Sailing Coach} \\ CS231A Final Report}
-\author{Andrew P. Kessler}
+\title{ {\bf Using Computer Vision for Real-time Estimation of Sail Angle for Performance Analysis and Automated Education } \\ CS231A Final Report}
+\author{Andrew P. Kessler \\
+\texttt{apkess@stanford.edu}}
 \date{\today}                                      
 
-\hypersetup{  colorlinks=false,       % false: boxed links; true: colored links
-    linkcolor=red,          % color of internal links (change box color with linkbordercolor)
-    citecolor=green,        % color of links to bibliography
-    filecolor=magenta,      % color of file links
-    urlcolor=cyan           % color of external links
-}
 \pagestyle{plain}
 \pagenumbering{arabic}
 
@@ -51,8 +46,7 @@
 
 \begin{abstract}
 
-
-This paper presents a method for estimating the angle of a sailboat's boom relative to the boat centerline, based only on data gathered from a single on-board camera.  We outline the algorithm used, which relies on known geometry of the boat to enable 3D reconstruction from images. This feature could be useful for logging sail behavior for offline review, and could later be incorporated with wind-direction data for real-time suggestion of sail adjustments - a first towards implementing a closed-loop sail angle controller. Results from experiments at full scale were promising, yielding estimations of sail angle accurate to within $\pm 10 ^\circ$. 
+This paper presents a real-time method for estimating the angle of a sailboat's boom relative to the boat centerline, based only on data gathered from a single on-board camera.  We outline the algorithm used, which relies on known geometry of the boat to enable 3D reconstruction from images. This feature could be useful for logging sail behavior for offline review, and could later be incorporated with wind-direction data for real-time suggestion of sail adjustments - a first step towards implementing a closed-loop sail angle controller. Results from experiments at full scale were promising, yielding estimations of sail angle accurate to within $\pm 10 ^\circ$. 
 \end{abstract}
 
 \section{Introduction}
@@ -64,21 +58,21 @@ Perhaps the most basic skill involved is optimizing the heading of the boat and 
 \begin{figure}[htbp]
    \centering
    \includegraphics[width=.42\textwidth]{pos_annotated} % requires the graphicx package
-   \caption{Some basic points-of-sail for a two-sailed vessel. Note how the angle of the sails relative to the boat ($\phi$) changes as the heading of the boat ($\theta$) changes. }
+   \caption{Some basic points-of-sail for a two-sailed vessel. Note how the angle of the sails relative to the boat ($\phi$) changes as the heading of the boat ($\theta$) changes. Adapted from \cite{pos_img}. }
    \label{fig:pos}
 \end{figure}
 For a given boat heading relative to the wind, there is an optimal angle at which the sails should be deployed relative to the boat, which could be modeled using some simple physics and trigonometry. Even if the wind direction is known exactly (which is rarely the case), determining this optimal angle in real-time can often prove difficult, even for the seasoned-sailor.
 
 Additionally, having access to logged data of how the sails were deployed at a given time for offline review would be a very helpful tool for training new sailors. 
 
-This project proposes the development a computer-vision based system that would would use data from an on-board camera to estimate the current angle of the sails based on known geometric constraints of the boat, and log this data for later future. In real-time, the current sail angle can be compared to the optimal sail angle (based on current wind conditions) to provide a suggest sail adjustment (or \emph{trim}) to the user. 
+This project proposes the development a computer-vision based system that would would use data from an on-board camera to estimate the current angle of the sails based on known geometric constraints of the boat, and log this data for later review. Additionally, in real-time, the current sail angle can be compared to the optimal sail angle (based on current wind conditions) to provide a suggest sail adjustment (or \emph{trim}) to the user. 
 
 \subsection{Proposed Solution}
 The first step in tackling the problem is narrowing the scope to only consider a single type of boat/sail-configuration. This system presented was developed and tested using a \emph{pram}, which at eight-feet in length is a relatively small, flat-bottomed boat with a flat front (see Fig.~\ref{fig:pram}).
 
 The base of the sail is firmly mounted to the \emph{boom}, which is essentially a long pole extending horizontally from the \emph{mast} (the vertical pole around which the boom rotates). The boom can swing anywhere within a $\pm 90^\circ$ range from the centerline of the boat, and is the main factor in determining the angle of the sail. For the purposes of this analysis, we will assume that the position boom uniquely determines the sail angle, although in reality, there are many other degrees of freedom that influence the sail angle and shape.
 
- The pilot controls boom angle via the \emph{mainsheet}: a line\footnote{Ropes in a maritime context are referred to as ``lines".} running from about three-quarters of the way down the boom to the center of the cockpit. By mounting a known and easily detectable fiducial at the endpoint of the boom (known as the \emph{clew}, the computer-vision system would segment the image based on color to extract the fiducial marker, and then use the proposed reconstruction algorithm to determine the angle of the boom.
+ The pilot controls boom angle via the \emph{mainsheet}: a line\footnote{Ropes in a maritime context are referred to as ``lines".} running from about three-quarters of the way down the boom to the center of the cockpit. By mounting a known and easily detectable fiducial at the endpoint of the boom (known as the \emph{clew}), the computer-vision system would segment the image based on color to extract the fiducial marker, and then use the proposed reconstruction algorithm to determine the angle of the boom.
  
 \begin{figure}[htbp]
    \centering
@@ -89,7 +83,7 @@ The base of the sail is firmly mounted to the \emph{boom}, which is essentially 
 
 Additionally, the system could utilize outward facing cameras to look for objects that are able to hint at the current wind direction, and extract an estimate of wind direction from their configuration. Ideally, these would be wind socks and vanes. For the purposes of this proof of concept project, we assume that the current wind direction and heading is known \emph{a priori}.
 
-With this information, the system can calculate optimal boom angle. This could then be compared to the current boom angle, and a recommended adjustment would be suggested to the pilot. In fact, given adequate resolution and computation resources, this could even be used to implement a closed-loop cruise-control. (Note that this is only one step of steering a boat; many other controls would need to be controlled before a true autonomous sailboat was possible - hence the cruise-control analogy.)
+With this information, the system can calculate the optimal boom angle. This could then be compared to the current boom angle, and a recommended adjustment would be suggested to the pilot. In fact, given adequate resolution and computational resources, this could even be used to implement a closed-loop ``cruise-control". (Note that this is only one step of steering a boat; many other controls would need to be automated before a true autonomous sailboat was possible - hence the cruise-control analogy.)
 
 As mentioned above, using the boom angle as an approximation of the sail angle is a simplified model. Other factors, such as sail shape, can have a large impact on boat performance.
 
@@ -114,15 +108,16 @@ The following sections describe the technical details of the method proposed. We
 \subsubsection{Calibration Summary}
 In order to do 3D reconstruction in later steps, we need to calibrate the camera for this scene. We assume that the camera is mounted securely to the back boat (facing forward), and that the boat geometry is known. To find the lumped camera matrix $M = K[R~t]$, we will observe the mappings of several calibration points of which 3D positions are known, and use a least-squares approach to solve for $M$. 
 \subsubsection{Calibration Details}
-If we assume we have an affine camera, every 2D point in the camera frame has a corresponding 3D point in the world frame, and they have the relationship
+If we assume we have an affine camera, every 3D point in the world frame has a corresponding 2D mapping in the image frame, and they have the relationship
 \[
 \left[\begin{array}{c}u_i \\v_i \\1\end{array}\right] =  
 \left[\begin{array}{cccc}
 m_{11} & m_{12} & m_{13} & m_{14} \\
 m_{21} & m_{22} & m_{23} & m_{24} \\
 0 & 0 & 0 & 1\end{array}\right]
-\left[\begin{array}{c}X_i\\Y_i\\Z_i\\1\end{array}\right].
+\left[\begin{array}{c}X_i\\Y_i\\Z_i\\1\end{array}\right],
 \]
+where $(u,v)$ are the image coordinates and $(X,Y,Z)$ are the world coordinates.
 This matrix equation can be expanded to
 \begin{align*}
 u_i &= m_{11}X_i + m_{12} Y_i + m_{13}Z_i + m_{14}\\
@@ -178,7 +173,7 @@ Now we know $p = MP$, where $p \in \real{3\times 1}$ is the image coordinate in 
 \subsubsection{Detection Summary}
 In this section, we explain how to take a raw image, and extract the 2D position of the fiducial marker (representing the end of the boom) from the image. We accomplish this using color thresholding and morphological operations. We assume that we know the color of the fiducial. 
 \subsubsection{Detection Details}
-We begin by taking a frame, and thresholding it in Hue-Saturation-Value (HSV) space to isolate a particular color fiducial. We use HSV thresholding as opposed to RGB thresholding because the HSV color basis is more robust to different lighting conditions and other factors. 
+We begin by taking a frame, and thresholding it in Hue-Saturation-Value (HSV) space to isolate a particular color fiducial. We use HSV thresholding as opposed to RGB thresholding because the HSV color basis is more robust to different lighting conditions and other factors \cite{hounslow:13}. 
 
 We can then create a binary mask of the image, where each pixel is either zero or one, depending on whether or not the HSV value of that pixel in the source image was between the allowable minimum and maximum cutoffs for all of hue, value, and saturation. 
 Assuming a proper calibration for appropriate threshold values, we are left with a black and white image, where points that match the desired color are white, and all others are black (see Fig. \ref{fig:premorph} for an example). 
@@ -206,7 +201,7 @@ Then, we can use the \emph{dilatation} operator to amplify existing whitespace (
 
 In the actual implementation, we use two erosions with a 3px by 3px kernel, followed by two dilations with the same kernel size.  An example before and after image of the results of applying morphological operations are shown in Fig. \ref{fig:morph}.
 
-At this point, we should have several ``blobs'' of whitespace, with the largest corresponding to the actual fiducial. To pick out the largest blob, we use the OpenCV implementation of the contour finding algorithm described in \cite{Suzuki:85}, which produces a list of found contours. 
+At this point, we should have several ``blobs'' of whitespace, with the largest corresponding to the actual fiducial. To pick out the largest blob, we use the OpenCV implementation of the contour finding algorithm described in \cite{Suzuki:85}, which produces a list of detected contours. 
 
 We then use the OpenCV function \mcode{moments} to calculate the area of each contour, and pick out the one  with the largest area (and thus most likely to correspond to the fidiucial). Finally, we take the center point of this contour as the location of our fiducial. We will call the two-dimensional coordinates of this point in the image $p = [u,v]^T$.
 
@@ -217,10 +212,10 @@ We now wish to estimate where the end of the boom is in 3D space based on our kn
 
 \subsubsection{Reconstruction Details}
 
-We know the length of the boom and the angle at which it sits relative to the world reference frame ($\alpha$, in Fig. \ref{fig:pram}), and if we assume that the boom rotates about the mast as a perfect circular joint, we know that the tail of the boom (our target point) \emph{must} be constrained to a circle of radius $R = \ell_B\cos{\alpha}$ at $\hat{y} = \ell_B\sin\alpha$ (see Fig. \ref{fig:overhead}). This means that
+We know the length of the boom and the angle at which it sits relative to the world reference frame ($\alpha$, in Fig. \ref{fig:pram}), and if we assume that the boom rotates about the mast as a perfect circular joint, we know that the tail of the boom (our target point) \emph{must} be constrained to a circle of radius $R = \ell_B\cos{\alpha}$ at height $\hat{y} = \ell_B\sin\alpha$ (see Fig. \ref{fig:overhead}). This means that
 \begin{gather}
 P_x^2 + P_z^2 = \ell_B^2\cos^2{\alpha}\label{eq:planar}\\
-P_y = \ell_B\sin\alpha = \hat{y}.
+P_y = \ell_B\sin\alpha = \hat{y}\label{eq:py}.
 \end{gather}
 
 
@@ -259,15 +254,15 @@ Now, we will enforce our planar constraint from \eq{planar} and ``snap" the poin
 \[
 d = P - O_C = \left[\begin{array}{c}P_x \\P_y \\P_z \end{array}\right] - \left[\begin{array}{c}0 \\ \hat{y} \\ 0\end{array}\right] = \left[\begin{array}{c}P_x\\ 0 \\ P_z\end{array}\right].
 \]
-We take find the the unit vector pointing in the direction of $d$, then multiply it by the allowed radius $R$, and add it back to the circle center to get the fixed point $P^\star$:
+We find the unit vector pointing in the direction of $d$, then multiply it by the allowed radius $R$, and add it back to the circle center to get the ``fixed" point $P^\star$:
 \[
 P^\star = \frac{R}{\norm{d}}d + O_C.
 \]
-The point $P^\star$ is the point which satisfies the geometrical constraints of the boat in \eq{planar} that is closest to the point where we believe the end of the boom to be in 3D space.
+The point $P^\star$ is the point which satisfies the geometrical constraints of the boat in \eq{planar} and \eq{py} that is closest to the point where we believe the end of the boom to be in 3D space.
 
 Now, calculating the boom angle is a simple matter of finding the angle of $d$ about the y-axis:
 \[
-\theta \approx \tan^{-1}\left({P^\star_x/P^\star_z}\right).
+\phi \approx \tan^{-1}\left({P^\star_x/P^\star_z}\right).
 \]
 Note that this needs to be the four-quadrant inverse tangent, as implemented in MATLAB's \mcode{atan2.m}.
 
@@ -288,7 +283,7 @@ Rather than try to derive optimal sail angles based on an analytical dynamics ap
 %  \caption{}
 %\end{figure}
 
-Using the reference frames for boat heading and sail angle relative to the boat (see Figures \ref{fig:wind_frame} and \ref{fig:boat_frame}, respectively), I fit a fourth-order polynomial to the data shown in the table below.
+Using the reference frames for boat heading and sail angle relative to the boat (see Figure \ref{fig:pos}), I fit a fourth-order polynomial to the data shown in the table below.
 \[
 \begin{tabular}{c|c|c}
 POS & $\theta$ & $\phi$ \\\hline 
@@ -297,14 +292,14 @@ Beam Reach & $\pi/2$ & $\pi/4$ \\\hline
 Broad Reach & $3\pi/4$ & $\pi/3$\\\hline 
 Running & $\pi$ & $\pi/2$\end{tabular}
 \]
-Using a least-squares fit, I found fit a polynomial of 
+Using a least-squares fit, I found a polynomial of 
 \[
-\phi = 0.2702 \theta^3 -1.6977 \theta^2 + 3.833 \theta  -2.0944 
+\phi^\star = 0.2702 \theta^3 -1.6977 \theta^2 + 3.833 \theta  -2.0944 
 \]
 which is shown in Figure \ref{fig:optimal}. I have no doubt that a more accurate model could be developed, but since this is not the focus of the project, I will leave the model as is- it can always be tweaked later. 
 \begin{figure}[htbp]
    \centering
-   \includegraphics[width=.3\textwidth]{optimal_angle} % requires the graphicx package
+   \includegraphics[width=.45\textwidth]{optimal_angle} % requires the graphicx package
    \caption{Heuristic model for optimal sail angle with third-order polynomial fit. This calibration is not intended to be perfect.} 
    \label{fig:optimal}
 \end{figure}
@@ -313,7 +308,7 @@ which is shown in Figure \ref{fig:optimal}. I have no doubt that a more accurate
 \section{Experimental Results}
 \subsection{Scale Model}
 \label{sec:scale}
-While this project was still in the early stages, experiments were done on a scale sailboat model, designed explicitly for this application. The scale model featured a $10"\times 10"$ base, with a  10" in mast. A ``boom" was placed around the mast with a roller-ball bearing enclosure, so it could freely swing around the mast. 
+When this project was still in the early stages, experiments were done on a scale sailboat model, designed explicitly for this application. The scale model featured a $10"\times 10"$ base, with a  10" in mast. A ``boom" was placed around the mast with a roller-ball bearing enclosure, so it could freely swing around the mast. 
 \begin{figure}[htbp]
   \centering
    \includegraphics[width=.45\textwidth]{scale_model} 
@@ -324,7 +319,7 @@ While this project was still in the early stages, experiments were done on a sca
 \begin{figure}[htbp]
   \centering
    \includegraphics[width=.45\textwidth]{scale_fid} 
-  \caption{Detecting the fiducial on the scale model. Here, a teal ping-ping ball was used as the fiducial marker, and the position in the image was easily extracted in real-time. The left shows the RGB image, and the right the thresholded mask.}
+  \caption{Detecting the fiducial on the scale model. Here, a teal ping-ping ball was used as the fiducial marker, and the position in the image was easily extracted in real-time. The left shows the RGB image, and the right the thresholded mask. A boom estimate is superimposed in blue.}
    \label{fig:scale_fid}
 \end{figure}
 
@@ -345,41 +340,41 @@ Based on boat geometry, we know the boom angle $\alpha=~15.5^\circ$, and the len
         \centering
          \begin{subfigure}[b]{0.3\textwidth}
                 \includegraphics[width=\textwidth]{closeups/t1_overlay}
-                \caption{$\theta \approx -58.8^\circ$}
+                \caption{$\phi \approx -58.8^\circ$, $\Delta \phi = 79.9^\circ$}
                 \label{fig:t1}
         \end{subfigure}
         ~
         \begin{subfigure}[b]{0.3\textwidth}
                 \includegraphics[width=\textwidth]{closeups/t7_overlay}
-                \caption{$\theta \approx -15.2^\circ$}
+                \caption{$\phi \approx -15.2^\circ$, $\Delta \phi = 36.3^\circ$}
                 \label{fig:t2}
         \end{subfigure}
         ~
         \begin{subfigure}[b]{0.3\textwidth}
                 \includegraphics[width=\textwidth]{closeups/t3_overlay}
-                \caption{$\theta \approx 1.6^\circ$}
+                \caption{$\phi \approx 1.6^\circ$, $\Delta \phi = 19.5^\circ$}
                 \label{fig:t3}
         \end{subfigure}
 		\\
 		\begin{subfigure}[b]{0.3\textwidth}
                 \includegraphics[width=\textwidth]{closeups/t4_overlay}
-                \caption{$\theta \approx 34.5^\circ$}
+                \caption{$\phi \approx 34.5^\circ$,$\Delta \phi = -13.3^\circ$}
                 \label{fig:t4}
         \end{subfigure}
         ~
         \begin{subfigure}[b]{0.3\textwidth}
                 \includegraphics[width=\textwidth]{closeups/t5_overlay}
-                \caption{$\theta \approx 22.5^\circ$}
+                \caption{$\phi \approx 22.5^\circ$,$\Delta \phi = -1.4^\circ$}
                 \label{fig:t5}
         \end{subfigure}
         ~
         \begin{subfigure}[b]{0.3\textwidth}
                 \includegraphics[width=\textwidth]{closeups/t6_overlay}
-                \caption{$\theta \approx 8.6^\circ$}
+                \caption{$\phi \approx 8.6^\circ$,$\Delta \phi = 12.4^\circ$}
                 \label{fig:t6}
         \end{subfigure}
         
-        \caption{Six tests taken with a different boom angle. The detected fiducial point is a blue circle, the constrained corresponding 3D point is reprojected into the image as a red $\times$, and the yellow circle is the projection off all possible constrained points, representing the path of the boom. An estimate of the boom is drawn as a red line.}
+        \caption{Six tests taken with a different boom angle. The detected fiducial point is a blue circle and  the fixed 3D point $P^\star$ is reprojected into the image as a red $\times$. The yellow circle is the possible path of the boom. The calculated boom angle $\phi$ is shown, as well as the suggested trim $\Delta \phi$ based on a heading $\theta = 60^\circ$ (so the optimal sail angle is $\phi^\star = 21.1^\circ$).}
         \label{fig:results}
 \end{figure*}
 
@@ -390,7 +385,7 @@ Via manual calibration we find that the color of the yellow fiducial can be well
 130 \leq V \leq 256
 \end{gather*} 
 where each $H,S,V \in [0,255]$.
-With this information, we can detect the fiducial position, and map it to the corresponding boom angle. In each figure, the detected fiducial point is shown as a blue circle, and the geometrically compliant point in $P^\star \in \real{3}$ is reprojected into the image, and drawn as a red $\times$. Additionally, a circle representing the radial constraint in \eq{planar} is projected into the image and drawn as a yellow line. It follows that the red $\times$ representing $P^\star$ will always be on the yellow constraining line. Finally, we superimpose a red line representing the boom, which is drawn from the world origin to $P^\star$, the projected into the image. 
+With this information, we can detect the fiducial position, and map it to the corresponding boom angle. In each figure, the detected fiducial point is shown as a blue circle, and the geometrically compliant point in $P^\star \in \real{3}$ is reprojected into the image, and drawn as a red $\times$. Additionally, a circle representing the radial constraint in \eq{planar} is projected into the image and drawn as a yellow line. It follows that the red $\times$ representing $P^\star$ will always be on the yellow constraining line. Finally, we superimpose a red line representing the boom, which is drawn from the world origin to $P^\star$, then projected into the image. 
 
 \begin{figure}[htbp]
 
@@ -406,16 +401,16 @@ With this information, we can detect the fiducial position, and map it to the co
                 \caption{The corresponding thresholded image, after morphological adjustments.}
                 \label{fig:t3_thresh_mask}
         \end{subfigure}
-  \caption{Example of OpenCV output looking for the fiducial based on color. Images cropped for clarity.}
+  \caption{Example of OpenCV output looking for the fiducial based on color. Images cropped for emphasis.}
    \label{fig:t3_thresh}
 \end{figure}
 
-Figure \ref{fig:results}, shows the boom at a six different angles. For these tests, the image capturing and HSV thresholding was done in realtime in OpenCV (see Figure \ref{fig:t3_thresh} for an example), and the 3D reconstruction  was done offline in MATLAB, although this could have also been implemented for real-time use in OpenCV.
+Figure \ref{fig:results} shows the boom at a six different angles. For these tests, the image capturing and HSV thresholding was done in real-time in OpenCV (see Figure \ref{fig:t3_thresh} for an example), and the 3D reconstruction  was done offline in MATLAB, although this could have also been implemented for real-time use in OpenCV.
 
 Comparing the calculated angles to the actual angles is much harder than it sounds; unfortunately it is very difficult to determine the actual angle of the boom. However, in practice, it does not really matter if the sail angle is exactly where it should be; usually a buffer of $\pm 5^\circ$ is sufficient for optimal performance. Fortunately, the results of this method yield results which appear to be within no more than a $\pm 10 ^\circ$  buffer from their actual values, suggesting that our method was relatively successful.
 
 \section{Conclusion}
-As mentioned in the previous section, an error of $\pm 10^\circ$ for estimating the sail angle is actually very good in context, since in practice, the sail angle only needs to be determined to about a $\pm 5^\circ$ tolerance. A reason for the larger margin in the experimental results is likely due to the relatively large size of the fiducial; a smaller fiducial would be able allow the system to better estimate the end-point of the boom in 3D space. However, a smaller fiducial would also make it more difficult to detect at all. Additionally, significant changes in lighting over the course of a day may impede attempts to detect a particular color fiducial. An alternative would be to use pattern based fiducial markers instead of colors, which may be more robust to lighting changes. 
+As mentioned in the previous section, an error of $\pm 10^\circ$ for estimating the sail angle is actually very good in context, since in practice, the sail angle only needs to be determined to about a $\pm 5^\circ$ tolerance. A reason for the larger margin in the experimental results is likely due to the relatively large size of the fiducial; a smaller fiducial would be able allow the system to better estimate the end-point of the boom in 3D space. However, a smaller fiducial would also make it more difficult to distinguish it from the noise. Additionally, significant changes in lighting over the course of a day may impede attempts to detect a particular color fiducial. An alternative would be to use pattern based fiducial markers instead of colors, which may be more robust to lighting changes. 
 
 The method proposed here only implements detecting the sail angle in real-time, which is sufficient for logging purposes. However, the method of fiducial detection and 3D reconstruction based on geometry could be extended to consider a wind-vane mounted on the boat, which could be similarly processed in real-time to calculate the current heading of the boat. Future work could involve implementing wind direction detection to allow real-time optimal sail angle calculation, which could be compared to the detected current sail angle for suggested adjustments or even a full closed-loop sail angle controller (using a scheme such as that shown in Fig. \ref{fig:closed}). 
 
@@ -435,17 +430,17 @@ Finally, it worth drawing attention to the fact that a computer vision based sys
 
 
 \appendix
-The code used for this project is available as a Git repository at \url{http://github.com/apkessler/sailing-coach}. All the code is, unsurprisingly, in the \verb=Code= subdirectory. 
+The code used for this project is available as a Git repository at \url{http://github.com/apkessler/sailing-coach}. 
 \subsection{Real-Time OpenCV Interface (C++)}
 The real-time OpenCV image-capture interface in \verb=Code/SailingCoach= was written in C++, and designed to track the a fiducial location in real-time from a camera feed. Running this program allows a user to experiment with different HSV thresholding values, then save/load them to an XML file for later use. This can be done with a source of a live feed, or on preexisting sample images. It also contains a mode for calibrating the camera using a auto-checkerboard detection, although this method (adapted from the OpenCV documentation examples) was not used in this project (calibration was done manually, in MATLAB). 
 
 The tracking code in \mcode{ColorSegmentation.cpp} performs the HSV thresholding and morphological operation in real-time. This code was adapted from (insert link here).It can output the 2D coordinates of the detected fiducial center point, but does not do any 3D reconstruction to estimate the sail angle.
 
 \subsection{3D Reconstruction Code (MATLAB)}
-The 3D reconstruction code was implemented in MATLAB due to encourage rapid prototyping and debugging - there is no reason why this code could not later be incorporated directly into the real-time C++ interface.
+The 3D reconstruction code was implemented in MATLAB to encourage rapid prototyping and debugging - there is no reason why this code could not later be incorporated directly into the real-time C++ interface.
 The file \mcode{vision_calibration.m} takes the known world coordinates of calibration points, and uses the corresponding points in the image to estimate the camera matrix $M$, as in Section \ref{sec:calibration}.
 
-The function \mcode{imagePoint2BoomAngle.m} takes a the 2D coordinates of the fiducial in the image, the matrix $M$, and the boat geometry as input and calculates the estimated 3D position of the fiducial point using the algorithm described in Section \ref{sec:3d}. The functions returns the calculated sail angle $\phi$, and can also plot these points, as well as boom reconstruction, on top of the origin image. 
+The function \mcode{imagePoint2BoomAngle.m} takes a the 2D coordinates of the fiducial in the image, the matrix $M$, and the boat geometry as input and calculates the estimated 3D position of the fiducial point using the algorithm described in Section \ref{sec:3d}. The functions returns the calculated sail angle $\phi$, and can also plot these points, as well as boom reconstruction, on top of the original image. 
 
 Finally, the script \mcode{runOnData.m} iterates over a set of captured frames, and calls \mcode{imagePoint2BoomAngle.m}  to estimate the sail angle for each one, and saves these figures to individual files.
 \subsection{Scale Model Files}

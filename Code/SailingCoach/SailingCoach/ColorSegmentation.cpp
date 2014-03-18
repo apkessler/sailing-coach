@@ -5,6 +5,11 @@
 //  Created by Andrew Kessler on 3/7/14.
 //  Copyright (c) 2014 Andrew Kessler. All rights reserved.
 //
+//  Based on code by Kyle Hounslow, 2013 
+
+// https://dl.dropboxusercontent.com/u/28096936/tuts/objectTrackingTut.cpp
+
+//
 
 #include "ColorSegmentation.h"
 #include "opencv2/opencv.hpp"

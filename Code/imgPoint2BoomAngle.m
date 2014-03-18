@@ -1,5 +1,5 @@
 function [theta_d] = imgPoint2BoomAngle(theImage, theCalibration, varargin)
-    
+%Calculate the angle of the boom based on the given image and calibration.
 p= [];
 if (nargin == 3)
     p = varargin{1};
